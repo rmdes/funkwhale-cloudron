@@ -54,9 +54,12 @@ export FUNKWHALE_API_PORT="5000"
 export EMAIL_CONFIG="smtp://${CLOUDRON_MAIL_SMTP_USERNAME}:${CLOUDRON_MAIL_SMTP_PASSWORD}@${CLOUDRON_MAIL_SMTP_SERVER}:${CLOUDRON_MAIL_SMTP_PORT}"
 export DEFAULT_FROM_EMAIL="${CLOUDRON_MAIL_FROM}"
 
-# Workers
+# Workers — keep counts low for container memory budget
+# Each gunicorn worker loads the full Django app (~150MB)
+# Each celery worker subprocess does the same
+# With 1GB limit: 2 gunicorn + 2 celery + beat + nginx fits comfortably
 export FUNKWHALE_WEB_WORKERS="${FUNKWHALE_WEB_WORKERS:-2}"
-export CELERYD_CONCURRENCY="${CELERYD_CONCURRENCY:-0}"
+export CELERYD_CONCURRENCY="${CELERYD_CONCURRENCY:-2}"
 
 # =============================================================================
 # Activate Python virtual environment
