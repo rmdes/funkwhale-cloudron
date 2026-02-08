@@ -1,0 +1,26 @@
+{
+  "id": "audio.funkwhale.cloudronapp",
+  "title": "Funkwhale",
+  "author": "Funkwhale Community",
+  "description": "file://DESCRIPTION.md",
+  "tagline": "A self-hosted, federated music streaming platform",
+  "version": "1.0.0",
+  "upstreamVersion": "2.0.0-rc13",
+  "healthCheckPath": "/api/v2/instance/nodeinfo/2.0/",
+  "httpPort": 8000,
+  "addons": {
+    "localstorage": {},
+    "postgresql": {},
+    "redis": {},
+    "sendmail": {}
+  },
+  "manifestVersion": 2,
+  "website": "https://funkwhale.audio",
+  "contactEmail": "contact@funkwhale.audio",
+  "icon": "file://logo.png",
+  "tags": ["music", "streaming", "podcast", "audio", "federation", "activitypub", "subsonic"],
+  "changelog": "file://CHANGELOG.md",
+  "postInstallMessage": "file://POSTINSTALL.md",
+  "memoryLimit": 536870912,
+  "minBoxVersion": "8.1.0"
+}
