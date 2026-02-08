@@ -6,7 +6,7 @@
   "tagline": "A self-hosted, federated music streaming platform",
   "version": "1.0.0",
   "upstreamVersion": "2.0.0-rc13",
-  "healthCheckPath": "/api/v2/instance/nodeinfo/2.0/",
+  "healthCheckPath": "/api/v2/instance/nodeinfo/2.1/",
   "httpPort": 8000,
   "addons": {
     "localstorage": {},

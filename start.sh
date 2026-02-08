@@ -98,9 +98,11 @@ gosu cloudron:cloudron celery \
 echo "=> Starting celery beat..."
 gosu cloudron:cloudron celery \
     --app funkwhale_api.taskapp beat \
-    --loglevel INFO &
+    --loglevel INFO \
+    --schedule=/app/data/celerybeat-schedule &
 
 echo "=> Starting gunicorn (main process)..."
+cd /app/data
 exec gosu cloudron:cloudron gunicorn config.asgi:application \
     --workers "${FUNKWHALE_WEB_WORKERS}" \
     --worker-class uvicorn.workers.UvicornWorker \
