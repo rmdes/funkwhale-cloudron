@@ -21,6 +21,6 @@
   "tags": ["music", "streaming", "podcast", "audio", "federation", "activitypub", "subsonic"],
   "changelog": "file://CHANGELOG.md",
   "postInstallMessage": "file://POSTINSTALL.md",
-  "memoryLimit": 536870912,
+  "memoryLimit": 1073741824,
   "minBoxVersion": "8.1.0"
 }

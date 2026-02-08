@@ -4,10 +4,10 @@ Open a terminal for this app from the Cloudron dashboard and run:
 
 ```
 source /app/code/venv/bin/activate
-funkwhale-manage createsuperuser
+funkwhale-manage fw users create --superuser --username yourname --email you@example.com --password yourpassword
 ```
 
-Follow the prompts to set your admin username, email, and password.
+Note: Funkwhale does not allow "admin" as a username. Change your password after first login.
 
 ## Music library
 
