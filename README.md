@@ -40,12 +40,21 @@ This package runs Funkwhale v2 inside a single Cloudron container with four proc
 git clone git@github.com:rmdes/funkwhale-cloudron.git
 cd funkwhale-cloudron
 
-# Build the Docker image
+# Build the Docker image (requires Docker)
 cloudron build
 
 # Install on your Cloudron (replace 'fw' with your desired subdomain)
 cloudron install --location fw
 ```
+
+After the initial install, use `cloudron update` for subsequent deployments:
+
+```bash
+cloudron build
+cloudron update --app fw.example.com
+```
+
+Set the memory limit to **1GB** in the Cloudron UI under Resource Limits after installation.
 
 ### Create Admin Account
 
@@ -53,10 +62,10 @@ After installation, open a **Web Terminal** for the app from the Cloudron dashbo
 
 ```bash
 source /app/code/venv/bin/activate
-funkwhale-manage createsuperuser
+funkwhale-manage fw users create --superuser --username yourname --email you@example.com --password yourpassword
 ```
 
-Follow the prompts to set your admin username, email, and password.
+Note: Funkwhale does not allow "admin" as a username. Change your password after first login.
 
 ## Architecture
 
@@ -186,7 +195,7 @@ To update to a new Funkwhale version:
 
 ```bash
 cloudron build
-cloudron update --app fw
+cloudron update --app fw.example.com
 ```
 
 Database migrations run automatically on startup.
@@ -217,14 +226,38 @@ cat /var/log/nginx/error.log
 # View from Cloudron dashboard → App → Logs
 ```
 
+### Running management commands
+
+The Cloudron web terminal does not inherit environment variables set by `start.sh`. To run `funkwhale-manage` commands, first activate the venv:
+
+```bash
+source /app/code/venv/bin/activate
+export DJANGO_SETTINGS_MODULE=config.settings.production
+export DJANGO_SECRET_KEY=$(cat /app/data/config/.secret_key)
+export DATABASE_URL="postgresql://${CLOUDRON_POSTGRESQL_USERNAME}:${CLOUDRON_POSTGRESQL_PASSWORD}@${CLOUDRON_POSTGRESQL_HOST}:${CLOUDRON_POSTGRESQL_PORT}/${CLOUDRON_POSTGRESQL_DATABASE}"
+export CACHE_URL="redis://:${CLOUDRON_REDIS_PASSWORD}@${CLOUDRON_REDIS_HOST}:${CLOUDRON_REDIS_PORT}/0"
+funkwhale-manage <command>
+```
+
 ### Health check fails
 
-The health check endpoint is `/api/v2/instance/nodeinfo/2.0/`. If the app shows as unhealthy:
+The health check endpoint is `/api/v2/instance/nodeinfo/2.1/`. If the app shows as unhealthy:
 
 1. Check that gunicorn is running: `ps aux | grep gunicorn`
 2. Check that nginx is running: `ps aux | grep nginx`
-3. Test the API directly: `curl -s http://localhost:5000/api/v2/instance/nodeinfo/2.0/`
-4. Test through nginx: `curl -s http://localhost:8000/api/v2/instance/nodeinfo/2.0/`
+3. Test the API directly: `curl -s http://localhost:5000/api/v2/instance/nodeinfo/2.1/`
+4. Test through nginx: `curl -s http://localhost:8000/api/v2/instance/nodeinfo/2.1/`
+
+### OOM kills / container restarts
+
+Funkwhale runs multiple Python processes, each loading the full Django app (~150MB). The default configuration (2 gunicorn + 2 celery workers + beat + nginx) fits within 1GB. If you experience OOM kills:
+
+1. Set the memory limit to at least 1GB in Cloudron UI (Resource Limits)
+2. Reduce worker counts via environment variables in start.sh:
+   - `FUNKWHALE_WEB_WORKERS=1` (gunicorn workers, default: 2)
+   - `CELERYD_CONCURRENCY=1` (celery workers, default: 2)
+
+**Important:** Never set `CELERYD_CONCURRENCY=0` — Celery will auto-detect CPU cores and spawn too many workers for the container's memory budget.
 
 ### Music uploads fail
 

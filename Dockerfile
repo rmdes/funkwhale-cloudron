@@ -32,6 +32,9 @@ RUN python3 -m venv /app/code/venv \
     && /app/code/venv/bin/pip install --upgrade pip wheel \
     && /app/code/venv/bin/pip install --editable /app/code/api
 
+# Fix Celery 5.3+ deprecation warning for connection retry on startup
+RUN echo 'CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True' >> /app/code/api/config/settings/production.py
+
 # Copy package files
 COPY start.sh nginx.conf /app/pkg/
 
