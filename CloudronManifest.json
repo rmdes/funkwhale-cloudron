@@ -14,6 +14,10 @@
     "redis": {},
     "sendmail": {},
     "scheduler": {
+      "00_read_me_first": {
+        "schedule": "0 0 30 2 *",
+        "command": "echo '=== Funkwhale Scheduler Tasks ===' && echo '' && echo 'SAFE tasks (run automatically):' && echo '  clear_sessions, clear_expired_tokens, collect_static' && echo '' && echo 'ON-DEMAND tasks (yearly schedule, use via this dropdown):' && echo '  *_check tasks = DRY RUN (safe, shows what would change)' && echo '  *_apply tasks = DESTRUCTIVE (actually modifies the database)' && echo '' && echo 'TIP: Add --help to any command before running it to see options.' && echo '     e.g. /app/pkg/manage.sh prune_library --help' && echo '' && echo 'All prune/fix commands default to dry-run. You must use the' && echo '_apply variant or pass --no-dry-run to make real changes.'"
+      },
       "clear_sessions": {
         "schedule": "23 3 * * *",
         "command": "/app/pkg/manage.sh clearsessions"
