@@ -103,6 +103,7 @@ Cloudron (handles TLS, DNS, backups, authentication)
 
 /app/pkg/               # Package scripts
 ├── start.sh            # Startup script
+├── manage.sh           # Wrapper for funkwhale-manage (used by scheduler)
 └── nginx.conf          # nginx config template
 ```
 
@@ -226,9 +227,57 @@ cat /var/log/nginx/error.log
 # View from Cloudron dashboard → App → Logs
 ```
 
+### Scheduler Tasks
+
+The Cloudron manifest includes a **Scheduler/Cron** dropdown in the app terminal with 17 Funkwhale management tasks. Click any task in the dropdown to populate the terminal command.
+
+**Safe tasks** (run automatically on schedule):
+
+| Task | Schedule | Description |
+|------|----------|-------------|
+| `clear_sessions` | Daily 3:23 AM | Remove expired Django sessions |
+| `clear_expired_tokens` | Daily 3:43 AM | Remove expired OAuth tokens |
+| `collect_static` | Weekly (Sun 4 AM) | Rebuild Django static files |
+
+**On-demand tasks** (yearly schedule — use via dropdown, not auto-run):
+
+| Task | Description |
+|------|-------------|
+| `check_preferences` | Verify instance preferences |
+| `rebuild_music_permissions` | Rebuild library access permissions |
+| `run_migrations` | Apply database migrations |
+
+**Destructive tasks** (split into check/apply pairs):
+
+| Check task (dry-run) | Apply task (real) | Description |
+|----------------------|-------------------|-------------|
+| `prune_library_check` | `prune_library_apply` | Remove orphaned artists/albums/tracks |
+| `prune_non_mbid_check` | `prune_non_mbid_apply` | Remove tracks without MusicBrainz IDs |
+| `prune_skipped_uploads_check` | `prune_skipped_uploads_apply` | Remove failed/skipped uploads |
+| `check_inplace_files_check` | `check_inplace_files_apply` | Verify in-place imported files |
+| `fix_uploads_check` | `fix_uploads_apply` | Fix upload metadata (mimetype, size, checksum) |
+
+> **Safety note:** All `_check` tasks default to **dry-run** mode — they show what *would* change without modifying the database. Only `_apply` tasks make real changes. Add `--help` to any command before running it to see available options.
+
+A `00_read_me_first` entry is included at the top of the dropdown as a quick reference for this safety model.
+
 ### Running management commands
 
-The Cloudron web terminal does not inherit environment variables set by `start.sh`. To run `funkwhale-manage` commands, first activate the venv:
+Use the `manage.sh` wrapper to run `funkwhale-manage` commands with the correct environment. This is what the scheduler tasks use:
+
+```bash
+/app/pkg/manage.sh <command> [args...]
+```
+
+For example:
+```bash
+/app/pkg/manage.sh prune_library --help
+/app/pkg/manage.sh createsuperuser
+```
+
+The wrapper maps all `CLOUDRON_*` environment variables to their Funkwhale equivalents (`DATABASE_URL`, `CACHE_URL`, `FUNKWHALE_HOSTNAME`, etc.) so you don't need to set them manually.
+
+Alternatively, you can set up the environment by hand in the web terminal:
 
 ```bash
 source /app/code/venv/bin/activate
@@ -290,9 +339,10 @@ docker run --rm -it funkwhale-cloudron /bin/bash
 
 ```
 funkwhale-cloudron/
-├── CloudronManifest.json   # Cloudron app metadata, addons, health check
+├── CloudronManifest.json   # Cloudron app metadata, addons, scheduler, health check
 ├── Dockerfile              # Build: cloudron/base + Funkwhale artifacts + venv
 ├── start.sh                # Startup: env mapping, migrations, 4-process launch
+├── manage.sh               # Wrapper: runs funkwhale-manage with Cloudron env vars
 ├── nginx.conf              # Internal routing (no TLS — Cloudron handles that)
 ├── DESCRIPTION.md          # App store listing
 ├── POSTINSTALL.md          # Post-install instructions
