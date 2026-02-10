@@ -36,6 +36,7 @@ RUN python3 -m venv /app/code/venv \
 RUN echo 'CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True' >> /app/code/api/config/settings/production.py
 
 # Copy package files
-COPY start.sh nginx.conf /app/pkg/
+COPY start.sh manage.sh nginx.conf /app/pkg/
+RUN chmod +x /app/pkg/manage.sh
 
 CMD ["/app/pkg/start.sh"]

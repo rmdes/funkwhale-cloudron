@@ -12,7 +12,73 @@
     "localstorage": {},
     "postgresql": {},
     "redis": {},
-    "sendmail": {}
+    "sendmail": {},
+    "scheduler": {
+      "clear_sessions": {
+        "schedule": "23 3 * * *",
+        "command": "/app/pkg/manage.sh clearsessions"
+      },
+      "clear_expired_tokens": {
+        "schedule": "43 3 * * *",
+        "command": "/app/pkg/manage.sh cleartokens"
+      },
+      "collect_static": {
+        "schedule": "0 4 * * 0",
+        "command": "/app/pkg/manage.sh collectstatic --noinput"
+      },
+      "check_preferences": {
+        "schedule": "0 5 1 1 *",
+        "command": "/app/pkg/manage.sh checkpreferences"
+      },
+      "rebuild_music_permissions": {
+        "schedule": "0 5 2 1 *",
+        "command": "/app/pkg/manage.sh rebuild_music_permissions"
+      },
+      "run_migrations": {
+        "schedule": "0 5 3 1 *",
+        "command": "/app/pkg/manage.sh migrate --noinput"
+      },
+      "prune_library_check": {
+        "schedule": "0 5 4 1 *",
+        "command": "/app/pkg/manage.sh prune_library --artists --albums --tracks"
+      },
+      "prune_library_apply": {
+        "schedule": "0 5 5 1 *",
+        "command": "/app/pkg/manage.sh prune_library --no-dry-run --artists --albums --tracks"
+      },
+      "prune_non_mbid_check": {
+        "schedule": "0 5 6 1 *",
+        "command": "/app/pkg/manage.sh prune_non_mbid_content"
+      },
+      "prune_non_mbid_apply": {
+        "schedule": "0 5 7 1 *",
+        "command": "/app/pkg/manage.sh prune_non_mbid_content --no-dry-run"
+      },
+      "prune_skipped_uploads_check": {
+        "schedule": "0 5 8 1 *",
+        "command": "/app/pkg/manage.sh prune_skipped_uploads"
+      },
+      "prune_skipped_uploads_apply": {
+        "schedule": "0 5 9 1 *",
+        "command": "/app/pkg/manage.sh prune_skipped_uploads --force true"
+      },
+      "check_inplace_files_check": {
+        "schedule": "0 5 10 1 *",
+        "command": "/app/pkg/manage.sh check_inplace_files"
+      },
+      "check_inplace_files_apply": {
+        "schedule": "0 5 11 1 *",
+        "command": "/app/pkg/manage.sh check_inplace_files --no-dry-run"
+      },
+      "fix_uploads_check": {
+        "schedule": "0 5 12 1 *",
+        "command": "/app/pkg/manage.sh fix_uploads --dry-run --mimetype --size --audio-data --checksum"
+      },
+      "fix_uploads_apply": {
+        "schedule": "0 5 13 1 *",
+        "command": "/app/pkg/manage.sh fix_uploads --mimetype --size --audio-data --checksum"
+      }
+    }
   },
   "manifestVersion": 2,
   "website": "https://funkwhale.audio",
